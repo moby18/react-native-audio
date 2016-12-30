@@ -38,6 +38,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
   private MediaRecorder recorder;
   private String currentOutputFile;
   private boolean isRecording = false;
+  private boolean isPausing = false;
 
 
   public AudioRecorderManager(ReactApplicationContext reactContext) {
@@ -179,8 +180,28 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void pauseRecording(Promise promise){
-    // Added this function to have the same api for android and iOS, stops recording now
-    stopRecording(promise);
+    if (!isRecording){
+      Log.e("INVALID_STATE", "Please call startRecording before pause recording");
+      promise.reject("INVALID_STATE", "Please call startRecording before pausing recording");
+      return;
+    }
+    recorder.pause();
+    isPausing = true;
+    promise.resolve(currentOutputFile);
+    sendEvent("recordingPaused", null);
+  }
+
+  @ReactMethod
+  public void resumeRecording(Promise promise){
+    if (!isPausing){
+      Log.e("INVALID_STATE", "Please call pauseRecording before resume recording");
+      promise.reject("INVALID_STATE", "Please call pauseRecording before resuming recording");
+      return;
+    }
+    recorder.resume();
+    isPausing = false;
+    promise.resolve(currentOutputFile);
+    sendEvent("recordingResumed", null);
   }
 
   private void sendEvent(String eventName, Object params) {
