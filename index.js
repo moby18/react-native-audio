@@ -55,6 +55,9 @@ var AudioRecorder = {
       }
     );
   },
+  isSupportedPauseResume: function() {
+    return AudioRecorderManager.isSupportedPauseResume();
+  },
   startRecording: function() {
     return AudioRecorderManager.startRecording();
   },

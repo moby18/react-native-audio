@@ -180,32 +180,32 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
         recorder.release();
         promise.resolve(currentOutputFile);
         sendEvent("recordingFinished", null);
-        Log.e("INVALID_STATE", "STTTOOOOPPPP!!!!!!!!!");
     }
 
     @ReactMethod
-    public void pauseRecording(Promise promise, Callback notSupportedCallback) {
+    public void isSupportedPauseResume(Promise promise) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            promise.resolve("Pause and Resume are supported");
+        } else {
+            Log.e(TAG, "Pause and Resume are not supported");
+            promise.reject("INVALID_STATE", "Pause and Resume are not supported");
+        }
+        return;
+    }
+
+    @ReactMethod
+    public void pauseRecording(Promise promise) {
         if (!isRecording) {
             Log.e("INVALID_STATE", "Please call startRecording before pause recording");
             promise.reject("INVALID_STATE", "Please call startRecording before pausing recording");
             return;
         }
-
-//    if (ContextCompat.checkSelfPermission(context,
-//            Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-
-//      ActivityCompat.requestPermissions(context,
-//              new String[]{Manifest.permission.RECORD_AUDIO},
-//              22);
-
-//    }
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             recorder.pause();
         } else {
             Log.e(TAG, "pauseRecording: NOT SUPPORTED");
             promise.reject("INVALID_STATE", "pauseRecording: NOT SUPPORTED");
             sendEvent("notSupported", null);
-            notSupportedCallback.invoke("pauseRecording: NOT SUPPORTED");
         }
         isPausing = true;
         promise.resolve(currentOutputFile);
@@ -213,7 +213,7 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void resumeRecording(Promise promise, Callback notSupportedCallback) {
+    public void resumeRecording(Promise promise) {
         if (!isPausing) {
             Log.e("INVALID_STATE", "Please call pauseRecording before resume recording");
             promise.reject("INVALID_STATE", "Please call pauseRecording before resuming recording");
@@ -225,7 +225,6 @@ class AudioRecorderManager extends ReactContextBaseJavaModule {
             Log.e(TAG, "resumeRecording: NOT SUPPORTED");
             promise.reject("INVALID_STATE", "resumeRecording: NOT SUPPORTED");
             sendEvent("notSupported", null);
-            notSupportedCallback.invoke("resumeRecording: NOT SUPPORTED");
         }
         isPausing = false;
         promise.resolve(currentOutputFile);
